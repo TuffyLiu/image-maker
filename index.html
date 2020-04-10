@@ -1,19 +1,71 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <title>Hello World!</title>
-  </head>
-  <body>
-    <h1>Hello World!</h1>
-    We are using Node.js <span id="node-version"></span>,
-    Chromium <span id="chrome-version"></span>,
-    and Electron <span id="electron-version"></span>.
+    <head>
+        <meta charset="UTF-8" />
+        <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+        <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'" /> -->
+        <!-- <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" /> -->
+        <title>批量卡片生成工具</title>
+        <link href="./assets/css/style.css" rel="stylesheet" />
+    </head>
+    <body>
+        <div class="container">
+            <div class="item">
+                <div class="row">
+                    <button id="img-select-btn">选择图片模版</button>
+                    <p id="img-select-path"></p>
+                </div>
+                <div class="row">
+                    <button id="font-select-btn">选择字体文件</button>
+                    <p id="font-select-path"></p>
+                </div>
+                <div class="row">
+                    <button id="excel-select-btn">选择数据Excel文档</button>
+                    <p id="excel-select-path"></p>
+                </div>
 
-    <!-- You can also require other files to run in this process -->
-    <script src="./renderer.js"></script>
-  </body>
+                <div class="row">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>数据名字</th>
+                                <th>横坐标</th>
+                                <th>竖坐标</th>
+                                <th>校准</th>
+                                <th>字体大小</th>
+                                <th>字体颜色</th>
+                                <th>类型</th>
+                                <th>写入</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-tbody"></tbody>
+                    </table>
+                </div>
+
+                <div class="row">
+                    <button id="result-select-btn">选择卡片保存文件夹</button>
+                    <p id="result-select-path"></p>
+                </div>
+                <div class="row">
+                    <button id="create-btn">批量生成卡片</button>
+                </div>
+            </div>
+            <div class="item right">
+                <div class="word-container" id="word"></div>
+                <img class="temp-img" id="temp-img" src="" alt="" />
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="sk-folding-cube">
+                <div class="sk-cube1 sk-cube"></div>
+                <div class="sk-cube2 sk-cube"></div>
+                <div class="sk-cube4 sk-cube"></div>
+                <div class="sk-cube3 sk-cube"></div>
+            </div>
+        </div>
+
+        <!-- You can also require other files to run in this process -->
+        <script src="./renderer.js"></script>
+    </body>
 </html>
