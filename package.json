@@ -1,14 +1,15 @@
 {
-  "name": "electron-quick-start",
+  "name": "image-maker",
   "version": "1.0.0",
   "description": "A minimal Electron application",
   "main": "main.js",
   "scripts": {
     "start": "npx electronmon .",
+    "build": "electron-builder",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder --win --x64"
+    "dist": "electron-builder --win"
   },
-  "repository": "https://github.com/electron/electron-quick-start",
+  "repository": "https://github.com/TuffyLiu/image-maker.git",
   "keywords": [
     "Electron",
     "quick",
