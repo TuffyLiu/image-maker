@@ -25,18 +25,22 @@ const myApp = {
 
 const resultSelectBtn = document.getElementById('result-select-btn');
 resultSelectBtn.addEventListener('click', (event) => {
+    // showLoading();
     ipcRenderer.send('open-result-dialog');
 });
 ipcRenderer.on('selected-result', (event, path) => {
+    hideLoading();
     document.getElementById('result-select-path').innerText = path;
     myApp.resultPath = path;
 });
 
 const fontSelectBtn = document.getElementById('font-select-btn');
 fontSelectBtn.addEventListener('click', (event) => {
+    // showLoading();
     ipcRenderer.send('open-font-dialog');
 });
 ipcRenderer.on('selected-font', (event, path) => {
+    hideLoading();
     const style = document.createElement('style');
     style.type = 'text/css';
     style.innerHTML = `
@@ -59,9 +63,11 @@ ipcRenderer.on('selected-font', (event, path) => {
 
 const imgSelectBtn = document.getElementById('img-select-btn');
 imgSelectBtn.addEventListener('click', (event) => {
+    // showLoading();
     ipcRenderer.send('open-img-dialog');
 });
 ipcRenderer.on('selected-img', (event, path) => {
+    hideLoading();
     document.getElementById('img-select-path').innerText = path;
     myApp.imgPath = path;
     myApp.imgDom.src = path;
@@ -76,15 +82,19 @@ ipcRenderer.on('selected-img', (event, path) => {
 
 const excelSelectBtn = document.getElementById('excel-select-btn');
 excelSelectBtn.addEventListener('click', (event) => {
+    // showLoading();
     ipcRenderer.send('open-excel-dialog');
 });
 
 ipcRenderer.on('selected-excel', (event, parmas) => {
+    hideLoading();
     myApp.excelPath = parmas.path;
     document.getElementById('excel-select-path').innerText = parmas.path;
     myApp.header = parmas.header;
     myApp.tbodyDom.innerHTML = '';
+    myApp.wordDom.innerHTML = '';
     parmas.header.forEach((item, index) => {
+        const defaultFont = 100;
         const div = document.createElement('div');
         const move = document.createElement('div');
         move.className = 'move';
@@ -95,18 +105,18 @@ ipcRenderer.on('selected-excel', (event, parmas) => {
         img.src = './assets/img/avater.png';
         img.style.height = 'auto';
         img.style.borderRadio = '50%';
-        img.style.width = Math.round(50 * myApp.ratio) + 'px';
-        img.style.height = Math.round(50 * myApp.ratio) + 'px';
+        img.style.width = Math.round(defaultFont * myApp.ratio) + 'px';
+        img.style.height = Math.round(defaultFont * myApp.ratio) + 'px';
 
         const span = document.createElement('span');
         span.id = `span_${index}`;
         span.innerText = item;
-        span.style.fontSize = Math.round(50 * myApp.ratio) + 'px';
+        span.style.fontSize = Math.round(defaultFont * myApp.ratio) + 'px';
         span.style.lineHeight = '1';
         span.style.color = '#333';
         span.style.textAlign = 'center';
         div.style.left = '0px';
-        div.style.top = index * 50 + 30 + 'px';
+        div.style.top = index * defaultFont + 30 + 'px';
         div.style.visibility = 'visible';
         div.appendChild(span);
         myApp.wordDom.appendChild(div);
@@ -191,7 +201,7 @@ ipcRenderer.on('selected-excel', (event, parmas) => {
 
         const tdFont = document.createElement('td');
         const inputFont = document.createElement('input');
-        inputFont.value = 50;
+        inputFont.value = defaultFont;
         inputFont.type = 'number';
         inputFont.name = 'font';
         inputFont.addEventListener('change', (event) => {
@@ -273,15 +283,33 @@ createBtn.addEventListener('click', (event) => {
             style: select[1].value,
         };
     });
-    loading.style.visibility = 'visible';
+    showLoading();
     ipcRenderer.send('create-img', {
         tr: setting,
     });
 });
 
 ipcRenderer.on('finish-created', (event, resultPath) => {
-    loading.style.visibility = 'hidden';
+    hideLoading();
     const myNotification = new Notification('批量生成成功!', {
         body: '卡片路径: ' + resultPath,
     });
 });
+
+ipcRenderer.on('finish-loading', (event, resultPath) => {
+    hideLoading();
+});
+
+ipcRenderer.on('show-loading', (event, resultPath) => {
+    showLoading();
+});
+
+
+
+function showLoading() {
+    loading.style.visibility = 'visible';
+}
+
+function hideLoading() {
+    loading.style.visibility = 'hidden';
+}

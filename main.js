@@ -8,11 +8,11 @@ const TextToSVG = require('text-to-svg');
 const download = require('download');
 
 const myApp = {
-    imgPath: 'assets/img/temp.jpg',
+    imgPath: '',
     tempPath: '',
     excelPath: '',
     resultPath: '',
-    fontPath: 'assets/font/苹方黑体-准-简.ttf',
+    fontPath: `${__dirname}/assets/font/苹方黑体-准-简.ttf`,
     data: [],
 };
 
@@ -228,7 +228,7 @@ ipcMain.on('create-img', (event, params) => {
                         input: buff,
                         blend: 'over',
                         top: st.y,
-                        left: st.align === 'center' ? Math.round(st.x - st.font / 2) : st.align === 'right' ? Math.round(st.x - st.font) : st.x,
+                        left: Math.max(0, st.align === 'center' ? Math.round(st.x - st.font / 2) : st.align === 'right' ? Math.round(st.x - st.font) : st.x),
                     };
                 } else {
                     const name = item[j].replace(/(^\s*)|(\s*$)/g, '');
@@ -238,7 +238,7 @@ ipcMain.on('create-img', (event, params) => {
                             input: options.svgPath,
                             blend: 'over',
                             top: st.y,
-                            left: st.align === 'center' ? Math.round(st.x - options.width / 2) : st.align === 'right' ? Math.round(st.x - options.width) : st.x,
+                            left: Math.max(0,st.align === 'center' ? Math.round(st.x - options.width / 2) : st.align === 'right' ? Math.round(st.x - options.width) : st.x),
                         };
                     } else {
                         return {};

@@ -5,9 +5,8 @@
   "main": "main.js",
   "scripts": {
     "start": "npx electronmon .",
-    "build": "electron-packager ./ --platform=mas",
-    "build:os": "electron-packager ./ --platform=mas",
-    "build:win32": "electron-packager ./ --platform=win32"
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win --x64"
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
@@ -21,7 +20,15 @@
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^8.2.0",
-    "electron-packager": "^14.2.1"
+    "electron-builder": "^22.4.1"
+  },
+  "build": {
+    "productName": "image-maker",
+    "appId": "com.tuffy.imagemaker",
+    "copyright": "COPYRIGHT © 2019–2029 TUFFY-阿胐",
+    "directories": {
+      "output": "build"
+    }
   },
   "dependencies": {
     "download": "^8.0.0",
