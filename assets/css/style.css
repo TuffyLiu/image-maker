@@ -20,6 +20,11 @@ body, html {
     width: 30px;
     background-image: url(../img/move.png);
     background-size: cover;
+    position: absolute;
+    left: 50%;
+    top: -30px;
+    transform: translateX(-50%);
+    z-index: 100;
 }
 .right {
     min-width: 500px;
@@ -36,9 +41,19 @@ body, html {
 }
 .word-container span{
     display: block;
-    position: absolute;
+    /* position: absolute; */
     line-height: 1;
+    
 }
+.drag {
+    position: absolute;
+    z-index: 0;
+}
+.drag span,
+.drag img {
+    z-index: 1;
+}
+
 
 .loading {
     z-index: 1000;
@@ -150,4 +165,54 @@ body, html {
         transform: perspective(140px) rotateY(180deg);
         opacity: 0;
     }
+}
+
+
+button {
+    display: inline-block;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid #dcdfe6;
+    color: #606266;
+    -webkit-appearance: none;
+    text-align: center;
+    box-sizing: border-box;
+    outline: none;
+    margin: 0;
+    transition: .1s;
+    font-weight: 500;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    padding: 12px 20px;
+    font-size: 14px;
+    border-radius: 4px;
+    color: #409eff;
+    background: #ecf5ff;
+    border-color: #b3d8ff;
+}
+button:hover {
+    opacity: 0.7;
+}
+button:active {
+    opacity: 1;
+}
+.row {
+    padding: 10px 20px 0 20px;
+}
+.tip {
+    color: #999;
+    font-size: 12px;
+}
+table th,
+table td{
+    min-width: 60px;
+    border: 1px solid #efefef;
+}
+.success {
+    color: #67c23a;
+    background: #f0f9eb;
+    border-color: #c2e7b0;
 }

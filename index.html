@@ -13,18 +13,18 @@
             <div class="item">
                 <div class="row">
                     <button id="img-select-btn">选择图片模版</button>
+                    <p class="tip">(必选项) 为批量卡片的图片底板</p>
                     <p id="img-select-path"></p>
                 </div>
                 <div class="row">
                     <button id="font-select-btn">选择字体文件</button>
+                    <p class="tip">(非必选项) 默认字体为"苹果黑体-准-简"</p>
                     <p id="font-select-path"></p>
                 </div>
                 <div class="row">
-                    <button id="excel-select-btn">选择数据Excel文档</button>
+                    <button id="excel-select-btn">选择Excel数据</button>
+                    <p class="tip">(必选项) 需要将不需要的列去除,当选择类型为头像时,字体大小为头像大小.</p>
                     <p id="excel-select-path"></p>
-                </div>
-
-                <div class="row">
                     <table>
                         <thead>
                             <tr>
@@ -38,20 +38,33 @@
                                 <th>写入</th>
                             </tr>
                         </thead>
-                        <tbody id="table-tbody"></tbody>
+                        <tbody id="table-tbody">
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
 
                 <div class="row">
-                    <button id="result-select-btn">选择卡片保存文件夹</button>
+                    <button id="result-select-btn">选择保存文件夹</button>
+                    <p class="tip">(必选项) 批量生成的卡片将保存在这个文件夹</p>
                     <p id="result-select-path"></p>
                 </div>
                 <div class="row">
-                    <button id="create-btn">批量生成卡片</button>
+                    <button id="create-btn" class="success">批量生成卡片</button>
                 </div>
             </div>
             <div class="item right">
-                <div class="word-container" id="word"></div>
+                <div class="word-container" id="word">
+                </div>
                 <img class="temp-img" id="temp-img" src="" alt="" />
             </div>
         </div>

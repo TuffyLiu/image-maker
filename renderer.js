@@ -10,10 +10,13 @@ const { ipcRenderer } = require('electron');
 const DragMove = require('./assets/js/dragMove.js');
 
 const myApp = {
-    imgRawWidth: 1201,
-    imgRawHeight: 1651,
-    ratio: 500 / 1201,
-    multiple: 1,
+    imgPath: '',
+    fontPath: '',
+    excelPath: '',
+    resultPath: '',
+    imgRawWidth: 0,
+    imgRawHeight: 0,
+    ratio: 0,
     wordDom: document.getElementById('word'),
     imgDom: document.getElementById('temp-img'),
     tbodyDom: document.getElementById('table-tbody'),
@@ -26,6 +29,7 @@ resultSelectBtn.addEventListener('click', (event) => {
 });
 ipcRenderer.on('selected-result', (event, path) => {
     document.getElementById('result-select-path').innerText = path;
+    myApp.resultPath = path;
 });
 
 const fontSelectBtn = document.getElementById('font-select-btn');
@@ -46,6 +50,7 @@ ipcRenderer.on('selected-font', (event, path) => {
     `;
     document.head.appendChild(style);
     document.getElementById('font-select-path').innerText = path;
+    myApp.fontPath = path;
 });
 
 // myApp.fontSelect.addEventListener('change', (event) => {
@@ -58,6 +63,7 @@ imgSelectBtn.addEventListener('click', (event) => {
 });
 ipcRenderer.on('selected-img', (event, path) => {
     document.getElementById('img-select-path').innerText = path;
+    myApp.imgPath = path;
     myApp.imgDom.src = path;
     const im = document.createElement('img');
     im.src = path;
@@ -74,6 +80,7 @@ excelSelectBtn.addEventListener('click', (event) => {
 });
 
 ipcRenderer.on('selected-excel', (event, parmas) => {
+    myApp.excelPath = parmas.path;
     document.getElementById('excel-select-path').innerText = parmas.path;
     myApp.header = parmas.header;
     myApp.tbodyDom.innerHTML = '';
@@ -81,6 +88,7 @@ ipcRenderer.on('selected-excel', (event, parmas) => {
         const div = document.createElement('div');
         const move = document.createElement('div');
         move.className = 'move';
+        div.className = 'drag';
         div.appendChild(move);
 
         const img = document.createElement('img');
@@ -98,7 +106,7 @@ ipcRenderer.on('selected-excel', (event, parmas) => {
         span.style.color = '#333';
         span.style.textAlign = 'center';
         div.style.left = '0px';
-        div.style.top = index * 200 + 'px';
+        div.style.top = index * 50 + 30 + 'px';
         div.style.visibility = 'visible';
         div.appendChild(span);
         myApp.wordDom.appendChild(div);
@@ -116,7 +124,16 @@ ipcRenderer.on('selected-excel', (event, parmas) => {
         inputX.type = 'number';
         inputX.name = 'x';
         inputX.addEventListener('change', (event) => {
-            div.style.left = event.target.value * myApp.ratio + 'px';
+            const width = div.style.width.replace('px', '');
+            let x = event.target.value * myApp.ratio;
+            if (selectAlign.value === 'center') {
+                x = x - width / 2;
+            } else if (selectAlign.value === 'right') {
+                x = x - width;
+            } else {
+                x = x;
+            }
+            div.style.left = x + 'px';
         });
         tdX.appendChild(inputX);
         tr.appendChild(tdX);
@@ -136,7 +153,7 @@ ipcRenderer.on('selected-excel', (event, parmas) => {
             id: index,
             callBack: (option) => {
                 let x = 0;
-                const width = span.style.width.replace('px', '');
+                const width = div.style.width.replace('px', '');
                 if (selectAlign.value === 'center') {
                     x = option.x + width / 2;
                 } else if (selectAlign.value === 'right') {
@@ -233,6 +250,16 @@ ipcRenderer.on('selected-excel', (event, parmas) => {
 const createBtn = document.getElementById('create-btn');
 const loading = document.getElementById('loading');
 createBtn.addEventListener('click', (event) => {
+    if (!myApp.imgPath) {
+        alert('请选择图片模版');
+        return false;
+    } else if (!myApp.excelPath) {
+        alert('请选择Excel数据');
+        return false;
+    } else if (!myApp.resultPath) {
+        alert('请选择保存文件夹');
+        return false;
+    }
     const setting = myApp.header.map((item, index) => {
         const input = document.getElementById('tr_' + index).getElementsByTagName('input');
         const select = document.getElementById('tr_' + index).getElementsByTagName('select');
@@ -258,19 +285,3 @@ ipcRenderer.on('finish-created', (event, resultPath) => {
         body: '卡片路径: ' + resultPath,
     });
 });
-
-// ipcRenderer.on('font-list', (event, data) => {
-//     const newFontList = [];
-//     data.map((item) => {
-//         if (item.indexOf('"') === 0) {
-//             newFontList.push(item.replace(/^"|"$/g, ''));
-//         } else {
-//             newFontList.push(item);
-//         }
-//     });
-//     myApp.fontSelect.innerHTML = newFontList.reduce((tot, cur) => {
-//         return tot + `<option value="${cur}" >${cur}</option>`;
-//     }, '');
-//     myApp.wordDom.style.fontFamily = newFontList[0];
-// });
-// ipcRenderer.send('get-sys-fonts');

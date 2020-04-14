@@ -25,7 +25,6 @@
   },
   "dependencies": {
     "download": "^8.0.0",
-    "font-list": "^1.2.9",
     "node-xlsx": "^0.15.0",
     "sharp": "^0.25.2",
     "text-to-svg": "^3.1.5"

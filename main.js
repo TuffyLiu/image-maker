@@ -1,16 +1,17 @@
 // Modules to control application life and create native browser window
 const { app, screen, BrowserWindow, ipcMain, dialog, shell } = require('electron');
-const fontList = require('font-list');
 const path = require('path');
 const fs = require('fs');
 const xlsx = require('node-xlsx');
 const sharp = require('sharp');
 const TextToSVG = require('text-to-svg');
+const download = require('download');
 
 const myApp = {
     imgPath: 'assets/img/temp.jpg',
+    tempPath: '',
     excelPath: '',
-    resultPath: '/Users/liuguilian/Desktop/result',
+    resultPath: '',
     fontPath: 'assets/font/苹方黑体-准-简.ttf',
     data: [],
 };
@@ -31,15 +32,7 @@ function createWindow() {
     mainWindow.loadFile('index.html');
 
     // Open the DevTools.
-    mainWindow.webContents.openDevTools();
-    fontList
-        .getFonts()
-        .then((fonts) => {
-            event.reply('font-list', fonts);
-        })
-        .catch((err) => {
-            console.log(err);
-        });
+    // mainWindow.webContents.openDevTools();
 }
 
 // This method will be called when Electron has finished
@@ -67,6 +60,11 @@ ipcMain.on('open-img-dialog', (event) => {
     dialog
         .showOpenDialog({
             properties: ['openFile'],
+            filters: [
+                {   name: 'Images',
+                    extensions: ['jpg', 'png']
+                }
+            ]
         })
         .then((result) => {
             if (!result.canceled) {
@@ -84,6 +82,11 @@ ipcMain.on('open-excel-dialog', (event) => {
     dialog
         .showOpenDialog({
             properties: ['openFile'],
+            filters: [
+                {   name: 'Excel',
+                    extensions: ['xlsx', 'xls']
+                }
+            ]
         })
         .then((result) => {
             if (!result.canceled) {
@@ -108,7 +111,8 @@ ipcMain.on('open-result-dialog', (event) => {
         .then((result) => {
             if (!result.canceled) {
                 myApp.resultPath = result.filePaths[0] + '/result';
-                event.sender.send('selected-result', myApp.resultPath);
+                myApp.tempPath = result.filePaths[0] + '/result/bin';
+                event.sender.send('selected-result', result.filePaths[0]);
             }
         })
         .catch((err) => {
@@ -120,6 +124,11 @@ ipcMain.on('open-font-dialog', (event) => {
     dialog
         .showOpenDialog({
             properties: ['openFile'],
+            filters: [
+                {   name: 'Font',
+                    extensions: ['ttf', 'otf', 'ttc']
+                }
+            ]
         })
         .then((result) => {
             if (!result.canceled) {
@@ -184,57 +193,73 @@ const getWordSvg = (textToSVG, word, size = 100, color = '#fff') => {
 const finishCreated = (event) => {
     shell.showItemInFolder(myApp.resultPath + '/');
     event.sender.send('finish-created', myApp.resultPath + '/');
+    removeDir(myApp.tempPath);
 };
 
 ipcMain.on('create-img', (event, params) => {
     removeDir(myApp.resultPath);
     mkDir(myApp.resultPath);
+    mkDir(myApp.tempPath);
     const textToSVG = TextToSVG.loadSync(myApp.fontPath);
     let mask = 0;
 
     myApp.data.forEach((item, index) => {
+        if (!item[0]) {
+            mask++;
+            return false;
+        }
         const fileName = item[0].replace(/(^\s*)|(\s*$)/g, '');
-        const composite = params.tr
-            .map((st, j) => {
-                const name = item[j].replace(/(^\s*)|(\s*$)/g, '');
-                const options = getWordSvg(textToSVG, name, st.font, st.color);
-                if (st.selected) {
+        Promise.all(
+            params.tr.map(async (st, j) => {
+                if (st.style === 'avatar') {
+                    await download(item[j], myApp.tempPath, { filename: item[0] + '.png' });
+                    const roundedCorners = Buffer.from(`<svg><circle r="${st.font / 2}" cx="${st.font / 2}" cy="${st.font / 2}"/></svg>`);
+                    const buff = await sharp(`${myApp.tempPath}/${item[0]}.png`)
+                        .resize(st.font, st.font)
+                        .composite([
+                            {
+                                input: roundedCorners,
+                                blend: 'dest-in',
+                            },
+                        ])
+                        .png()
+                        .toBuffer();
                     return {
-                        input: options.svgPath,
+                        input: buff,
                         blend: 'over',
                         top: st.y,
-                        left: st.align === 'center' ? Math.round(st.x - options.width / 2) : st.align === 'right' ? Math.round(st.x - options.width) : st.x,
+                        left: st.align === 'center' ? Math.round(st.x - st.font / 2) : st.align === 'right' ? Math.round(st.x - st.font) : st.x,
                     };
                 } else {
-                    return {};
+                    const name = item[j].replace(/(^\s*)|(\s*$)/g, '');
+                    const options = getWordSvg(textToSVG, name, st.font, st.color);
+                    if (st.selected) {
+                        return {
+                            input: options.svgPath,
+                            blend: 'over',
+                            top: st.y,
+                            left: st.align === 'center' ? Math.round(st.x - options.width / 2) : st.align === 'right' ? Math.round(st.x - options.width) : st.x,
+                        };
+                    } else {
+                        return {};
+                    }
                 }
             })
-            .filter((st) => {
-                return !!st.blend;
-            });
-        sharp(myApp.imgPath)
-            .composite(composite)
-            .toFile(`${myApp.resultPath}/${fileName}.jpg`, (err, info) => {
-                mask++;
-                if (mask === myApp.data.length) {
-                    finishCreated(event);
-                }
-                if (err) {
-                    console.log('生成卡片失败', err);
-                } else {
-                    // console.log(`${index + '_' + fileName}.jpg done!`);
-                }
-            });
+        ).then((composite) => {
+            sharp(myApp.imgPath)
+                .composite(composite)
+                .toFile(`${myApp.resultPath}/${fileName}.jpg`, (err, info) => {
+                    mask++;
+                    if (mask === myApp.data.length) {
+                        finishCreated(event);
+                    }
+                    if (err) {
+                        console.log('生成卡片失败', err);
+                    } else {
+                        console.log(`${index}.jpg done!`);
+                    }
+                });
+        });
     });
 });
 
-ipcMain.on('get-sys-fonts', (event) => {
-    fontList
-        .getFonts()
-        .then((fonts) => {
-            event.reply('font-list', fonts);
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-});
