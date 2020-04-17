@@ -7,7 +7,7 @@
     "start": "npx electronmon .",
     "build": "electron-builder",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder --win"
+    "dist": "electron-builder --win --ia32"
   },
   "repository": "https://github.com/TuffyLiu/image-maker.git",
   "keywords": [
@@ -21,14 +21,36 @@
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^8.2.0",
-    "electron-builder": "^22.4.1"
+    "electron-builder": "^22.4.1",
+    "electron-rebuild": "^1.10.1"
   },
   "build": {
+    "electronDownload": {
+      "mirror": "https://npm.taobao.org/mirrors/electron/"
+    },
     "productName": "image-maker",
     "appId": "com.tuffy.imagemaker",
     "copyright": "COPYRIGHT © 2019–2029 TUFFY-阿胐",
     "directories": {
       "output": "build"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "image-maker"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "ia32"
+          ]
+        }
+      ]
     }
   },
   "dependencies": {
