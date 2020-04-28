@@ -13,7 +13,7 @@ const myApp = {
     excelPath: '',
     resultPath: '',
     fontPath: `${__dirname}/assets/font/苹方黑体-准-简.ttf`,
-    data: [],
+    data: []
 };
 
 function createWindow() {
@@ -24,8 +24,8 @@ function createWindow() {
         height,
         webPreferences: {
             nodeIntegration: true,
-            preload: path.join(__dirname, 'preload.js'),
-        },
+            preload: path.join(__dirname, 'preload.js')
+        }
     });
 
     // and load the index.html of the app.
@@ -60,15 +60,10 @@ ipcMain.on('open-img-dialog', (event) => {
     dialog
         .showOpenDialog({
             properties: ['openFile'],
-            filters: [
-                {   name: 'Images',
-                    extensions: ['jpg', 'png']
-                }
-            ]
+            filters: [{ name: 'Images', extensions: ['jpg', 'png', 'jpeg'] }]
         })
         .then((result) => {
             if (!result.canceled) {
-                console.log(result);
                 myApp.imgPath = result.filePaths[0];
                 event.sender.send('selected-img', result.filePaths[0]);
             }
@@ -82,11 +77,7 @@ ipcMain.on('open-excel-dialog', (event) => {
     dialog
         .showOpenDialog({
             properties: ['openFile'],
-            filters: [
-                {   name: 'Excel',
-                    extensions: ['xlsx', 'xls']
-                }
-            ]
+            filters: [{ name: 'Excel', extensions: ['xlsx', 'xls'] }]
         })
         .then((result) => {
             if (!result.canceled) {
@@ -94,7 +85,7 @@ ipcMain.on('open-excel-dialog', (event) => {
                 myApp.data = xlsx.parse(fs.readFileSync(myApp.excelPath))[0].data;
                 event.sender.send('selected-excel', {
                     path: myApp.excelPath,
-                    header: myApp.data.shift(),
+                    header: myApp.data.shift()
                 });
             }
         })
@@ -106,7 +97,7 @@ ipcMain.on('open-excel-dialog', (event) => {
 ipcMain.on('open-result-dialog', (event) => {
     dialog
         .showOpenDialog({
-            properties: ['openDirectory'],
+            properties: ['openDirectory']
         })
         .then((result) => {
             if (!result.canceled) {
@@ -124,11 +115,7 @@ ipcMain.on('open-font-dialog', (event) => {
     dialog
         .showOpenDialog({
             properties: ['openFile'],
-            filters: [
-                {   name: 'Font',
-                    extensions: ['ttf', 'otf', 'ttc']
-                }
-            ]
+            filters: [{ name: 'Font', extensions: ['ttf', 'otf', 'ttc'] }]
         })
         .then((result) => {
             if (!result.canceled) {
@@ -170,7 +157,7 @@ const removeDir = (dir) => {
 
 const getWordSvg = (textToSVG, word, size = 100, color = '#fff') => {
     const attributes = {
-        fill: color,
+        fill: color
     };
     const svgOptions = {
         x: 0,
@@ -179,14 +166,14 @@ const getWordSvg = (textToSVG, word, size = 100, color = '#fff') => {
         fontSize: size,
         kerning: true,
         anchor: 'top',
-        attributes: attributes,
+        attributes: attributes
     };
     const svg = textToSVG.getSVG(word, svgOptions);
     const width = Number(svg.match(/width="(.*?)"/)[1]);
     const svgPath = Buffer.from(svg);
     return {
         width: width,
-        svgPath: svgPath,
+        svgPath: svgPath
     };
 };
 
@@ -204,13 +191,15 @@ ipcMain.on('create-img', (event, params) => {
     let mask = 0;
 
     myApp.data.forEach((item, index) => {
+        item[0] = item[0] + '';
         if (!item[0]) {
             mask++;
             return false;
         }
-        const fileName = item[0].replace(/(^\s*)|(\s*$)/g, '');
+        const fileName = index + '_' + item[0].replace(/(^\s*)|(\s*$)/g, '');
         Promise.all(
             params.tr.map(async (st, j) => {
+                item[j] = item[j] + '';
                 if (st.style === 'avatar') {
                     await download(item[j], myApp.tempPath, { filename: item[0] + '.png' });
                     const roundedCorners = Buffer.from(`<svg><circle r="${st.font / 2}" cx="${st.font / 2}" cy="${st.font / 2}"/></svg>`);
@@ -219,8 +208,8 @@ ipcMain.on('create-img', (event, params) => {
                         .composite([
                             {
                                 input: roundedCorners,
-                                blend: 'dest-in',
-                            },
+                                blend: 'dest-in'
+                            }
                         ])
                         .png()
                         .toBuffer();
@@ -228,7 +217,7 @@ ipcMain.on('create-img', (event, params) => {
                         input: buff,
                         blend: 'over',
                         top: st.y,
-                        left: Math.max(0, st.align === 'center' ? Math.round(st.x - st.font / 2) : st.align === 'right' ? Math.round(st.x - st.font) : st.x),
+                        left: Math.max(0, st.align === 'center' ? Math.round(st.x - st.font / 2) : st.align === 'right' ? Math.round(st.x - st.font) : st.x)
                     };
                 } else {
                     const name = item[j].replace(/(^\s*)|(\s*$)/g, '');
@@ -238,28 +227,36 @@ ipcMain.on('create-img', (event, params) => {
                             input: options.svgPath,
                             blend: 'over',
                             top: st.y,
-                            left: Math.max(0,st.align === 'center' ? Math.round(st.x - options.width / 2) : st.align === 'right' ? Math.round(st.x - options.width) : st.x),
+                            left: Math.max(0, st.align === 'center' ? Math.round(st.x - options.width / 2) : st.align === 'right' ? Math.round(st.x - options.width) : st.x)
                         };
                     } else {
                         return {};
                     }
                 }
             })
-        ).then((composite) => {
-            sharp(myApp.imgPath)
-                .composite(composite)
-                .toFile(`${myApp.resultPath}/${fileName}.jpg`, (err, info) => {
-                    mask++;
-                    if (mask === myApp.data.length) {
-                        finishCreated(event);
-                    }
-                    if (err) {
-                        console.log('生成卡片失败', err);
-                    } else {
-                        console.log(`${index}.jpg done!`);
-                    }
+        )
+            .then((composite) => {
+                composite = composite.filter((item) => {
+                    return !!item.input;
                 });
-        });
+                sharp(myApp.imgPath)
+                    .composite(composite)
+                    .toFile(`${myApp.resultPath}/${fileName}.jpg`, (err, info) => {
+                        mask++;
+                        if (mask === myApp.data.length) {
+                            finishCreated(event);
+                        }
+                        if (err) {
+                            console.log('生成卡片失败', err);
+                            event.sender.send('erro', '生成卡片失败');
+                        } else {
+                            console.log(`${index}.jpg done!`);
+                        }
+                    });
+            })
+            .catch((e) => {
+                console.log(e);
+                event.sender.send('erro', '生成卡片失败');
+            });
     });
 });
-

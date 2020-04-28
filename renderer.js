@@ -167,7 +167,7 @@ ipcRenderer.on('selected-excel', (event, parmas) => {
                 if (selectAlign.value === 'center') {
                     x = option.x + width / 2;
                 } else if (selectAlign.value === 'right') {
-                    x = option.x + width;
+                    x = option.x + Math.round(width);
                 } else {
                     x = option.x;
                 }
@@ -304,7 +304,12 @@ ipcRenderer.on('show-loading', (event, resultPath) => {
     showLoading();
 });
 
-
+ipcRenderer.on('erro', (event) => {
+    hideLoading();
+    const myNotification = new Notification('生成卡片失败!', {
+        body: '生成卡片失败~~请重新尝试!!'
+    });
+});
 
 function showLoading() {
     loading.style.visibility = 'visible';
