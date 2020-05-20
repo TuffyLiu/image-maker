@@ -20,7 +20,7 @@ const myApp = {
     wordDom: document.getElementById('word'),
     imgDom: document.getElementById('temp-img'),
     tbodyDom: document.getElementById('table-tbody'),
-    header: ['姓名'],
+    header: ['姓名']
 };
 
 const resultSelectBtn = document.getElementById('result-select-btn');
@@ -94,7 +94,7 @@ ipcRenderer.on('selected-excel', (event, parmas) => {
     myApp.tbodyDom.innerHTML = '';
     myApp.wordDom.innerHTML = '';
     parmas.header.forEach((item, index) => {
-        const defaultFont = 100;
+        const defaultFont = myApp.imgDom.naturalWidth ? Math.ceil(myApp.imgDom.naturalWidth / 20) : 100;
         const div = document.createElement('div');
         const move = document.createElement('div');
         move.className = 'move';
@@ -173,7 +173,7 @@ ipcRenderer.on('selected-excel', (event, parmas) => {
                 }
                 inputX.value = Math.round(x / myApp.ratio);
                 inputY.value = Math.round(option.y / myApp.ratio);
-            },
+            }
         });
 
         const tdAlign = document.createElement('td');
@@ -280,19 +280,19 @@ createBtn.addEventListener('click', (event) => {
             color: input[3].value,
             selected: input[4].checked,
             align: select[0].value,
-            style: select[1].value,
+            style: select[1].value
         };
     });
     showLoading();
     ipcRenderer.send('create-img', {
-        tr: setting,
+        tr: setting
     });
 });
 
 ipcRenderer.on('finish-created', (event, resultPath) => {
     hideLoading();
     const myNotification = new Notification('批量生成成功!', {
-        body: '卡片路径: ' + resultPath,
+        body: '卡片路径: ' + resultPath
     });
 });
 
