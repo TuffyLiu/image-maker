@@ -83,6 +83,9 @@ ipcMain.on('open-excel-dialog', (event) => {
             if (!result.canceled) {
                 myApp.excelPath = result.filePaths[0];
                 myApp.data = xlsx.parse(fs.readFileSync(myApp.excelPath))[0].data;
+                myApp.data = myApp.data.filter((item) => {
+                    return !!item[0];
+                });
                 event.sender.send('selected-excel', {
                     path: myApp.excelPath,
                     header: myApp.data.shift()
@@ -201,9 +204,9 @@ ipcMain.on('create-img', (event, params) => {
             params.tr.map(async (st, j) => {
                 item[j] = item[j] + '';
                 if (st.style === 'avatar') {
-                    await download(item[j], myApp.tempPath, { filename: item[0] + '.png' });
+                    await download(item[j], myApp.tempPath, { filename: index + '.png' });
                     const roundedCorners = Buffer.from(`<svg><circle r="${st.font / 2}" cx="${st.font / 2}" cy="${st.font / 2}"/></svg>`);
-                    const buff = await sharp(`${myApp.tempPath}/${item[0]}.png`)
+                    const buff = await sharp(`${myApp.tempPath}/${index}.png`)
                         .resize(st.font, st.font)
                         .composite([
                             {
