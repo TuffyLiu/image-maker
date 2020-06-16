@@ -94,7 +94,7 @@ ipcRenderer.on('selected-excel', (event, parmas) => {
     myApp.tbodyDom.innerHTML = '';
     myApp.wordDom.innerHTML = '';
     parmas.header.forEach((item, index) => {
-        const defaultFont = myApp.imgDom.naturalWidth ? Math.ceil(myApp.imgDom.naturalWidth / 20) : 100;
+        const defaultFont = myApp.imgDom.naturalWidth ? Math.ceil(myApp.imgDom.naturalWidth / 30) : 30;
         const div = document.createElement('div');
         const move = document.createElement('div');
         move.className = 'move';
@@ -105,18 +105,20 @@ ipcRenderer.on('selected-excel', (event, parmas) => {
         img.src = './assets/img/avater.png';
         img.style.height = 'auto';
         img.style.borderRadio = '50%';
-        img.style.width = Math.round(defaultFont * myApp.ratio) + 'px';
-        img.style.height = Math.round(defaultFont * myApp.ratio) + 'px';
+        img.style.width = defaultFont + 'px';
+        img.style.height = defaultFont + 'px';
 
-        const span = document.createElement('span');
+        const span = document.createElement('p');
         span.id = `span_${index}`;
         span.innerText = item;
-        span.style.fontSize = Math.round(defaultFont * myApp.ratio) + 'px';
+        span.style.fontSize = defaultFont + 'px';
         span.style.lineHeight = '1';
         span.style.color = '#333';
         span.style.textAlign = 'center';
         div.style.left = '0px';
-        div.style.top = index * defaultFont + 30 + 'px';
+
+        const defaulTop = index * defaultFont + 30;
+        div.style.top = defaulTop + 'px';
         div.style.visibility = 'visible';
         div.appendChild(span);
         myApp.wordDom.appendChild(div);
@@ -130,12 +132,61 @@ ipcRenderer.on('selected-excel', (event, parmas) => {
 
         const tdX = document.createElement('td');
         const inputX = document.createElement('input');
-        inputX.value = 0;
+        // inputX.value = div.style.offsetWidth / 2;
         inputX.type = 'number';
         inputX.name = 'x';
         inputX.addEventListener('change', (event) => {
-            const width = div.style.width.replace('px', '');
-            let x = event.target.value * myApp.ratio;
+            // const width = div.offsetWidth;
+            // let x = event.target.value;
+            // if (selectAlign.value === 'center') {
+            //     x = x - width / 2;
+            // } else if (selectAlign.value === 'right') {
+            //     x = x - width;
+            // } else {
+            //     x = x;
+            // }
+            div.style.left = event.target.value + 'px';
+            updatePoitX(event.target.value);
+        });
+
+        tdX.appendChild(inputX);
+        tr.appendChild(tdX);
+
+        const tdY = document.createElement('td');
+        const inputY = document.createElement('input');
+        inputY.type = 'number';
+        inputY.name = 'y';
+        inputY.addEventListener('change', (event) => {
+            updatePoitY(event.target.value);
+        });
+        tdY.appendChild(inputY);
+        tr.appendChild(tdY);
+
+        const drag = new DragMove(div, move, {
+            id: index,
+            callBack: () => {
+                updateInput();
+            }
+        });
+
+        const updateInput = () => {
+            const left = div.offsetLeft;
+            const width = div.offsetWidth;
+            let x = 0;
+
+            if (selectAlign.value === 'center') {
+                x = left + width / 2;
+            } else if (selectAlign.value === 'right') {
+                x = left + width;
+            } else {
+                x = left;
+            }
+            inputY.value = div.offsetTop + div.offsetHeight / 2;
+            inputX.value = x;
+        };
+
+        const updatePoitX = (x) => {
+            const width = div.offsetWidth;
             if (selectAlign.value === 'center') {
                 x = x - width / 2;
             } else if (selectAlign.value === 'right') {
@@ -144,57 +195,42 @@ ipcRenderer.on('selected-excel', (event, parmas) => {
                 x = x;
             }
             div.style.left = x + 'px';
-        });
-        tdX.appendChild(inputX);
-        tr.appendChild(tdX);
+        };
 
-        const tdY = document.createElement('td');
-        const inputY = document.createElement('input');
-        inputY.value = index * 200;
-        inputY.type = 'number';
-        inputY.name = 'y';
-        inputY.addEventListener('change', (event) => {
-            div.style.top = event.target.value * myApp.ratio + 'px';
-        });
-        tdY.appendChild(inputY);
-        tr.appendChild(tdY);
-
-        const drag = new DragMove(div, move, {
-            id: index,
-            callBack: (option) => {
-                let x = 0;
-                const width = div.style.width.replace('px', '');
-                if (selectAlign.value === 'center') {
-                    x = option.x + width / 2;
-                } else if (selectAlign.value === 'right') {
-                    x = option.x + Math.round(width);
-                } else {
-                    x = option.x;
-                }
-                inputX.value = Math.round(x / myApp.ratio);
-                inputY.value = Math.round(option.y / myApp.ratio);
-            }
-        });
+        const updatePoitY = (y) => {
+            div.style.top = y - div.offsetHeight / 2 + 'px';
+        };
 
         const tdAlign = document.createElement('td');
         const selectAlign = document.createElement('select');
         selectAlign.innerHTML = `
             <option value="center" selected>居中</option>
             <option value="left">左对齐</option>
-            <option value="right">右对其</option>
+            <option value="right">右对齐</option>
         `;
         selectAlign.addEventListener('change', (event) => {
-            let x = 0;
-            const left = div.style.left.replace('px', '');
-            const width = span.style.width.replace('px', '');
+            // let x = 0;
+            // const left = div.style.offsetLeft;
+            // const width = div.style.offsetWidth;
             if (selectAlign.value === 'center') {
-                x = +left + width / 2;
+                // x = +left + width / 2;
+                move.style.left = '50%';
+                move.style.right = 'auto';
+                move.style.transform = 'translateX(-50%) translateY(-50%)';
             } else if (selectAlign.value === 'right') {
-                x = +left + width;
+                // x = +left + width;
+                move.style.left = 'auto';
+                move.style.right = '0';
+                move.style.transform = 'translateX(0) translateY(-50%)';
             } else {
-                x = left;
+                // x = left;
+                move.style.left = '0';
+                move.style.right = 'auto';
+                move.style.transform = 'translateX(0) translateY(-50%)';
             }
-            inputX.value = Math.round(x / myApp.ratio);
+            // console.log(left, width, x);
+            // inputX.value = x;
+            updateInput();
         });
         tdAlign.appendChild(selectAlign);
         tr.appendChild(tdAlign);
@@ -205,9 +241,14 @@ ipcRenderer.on('selected-excel', (event, parmas) => {
         inputFont.type = 'number';
         inputFont.name = 'font';
         inputFont.addEventListener('change', (event) => {
-            span.style.fontSize = Math.round(event.target.value * myApp.ratio) + 'px';
-            img.style.width = Math.round(event.target.value * myApp.ratio) + 'px';
-            img.style.height = Math.round(event.target.value * myApp.ratio) + 'px';
+            if (selectStyle.value === 'avatar') {
+                img.style.width = event.target.value + 'px';
+                img.style.height = event.target.value + 'px';
+            } else {
+                span.style.fontSize = event.target.value + 'px';
+            }
+            drag.update();
+            updateInput();
         });
         tdFont.appendChild(inputFont);
         tr.appendChild(tdFont);
@@ -237,6 +278,8 @@ ipcRenderer.on('selected-excel', (event, parmas) => {
                 span.removeChild(img);
                 span.innerText = item;
             }
+            drag.update();
+            updateInput();
         });
         tdStyle.appendChild(selectStyle);
         tr.appendChild(tdStyle);
@@ -254,6 +297,7 @@ ipcRenderer.on('selected-excel', (event, parmas) => {
         tr.appendChild(tdShow);
 
         myApp.tbodyDom.appendChild(tr);
+        updateInput();
     });
 });
 
@@ -273,10 +317,11 @@ createBtn.addEventListener('click', (event) => {
     const setting = myApp.header.map((item, index) => {
         const input = document.getElementById('tr_' + index).getElementsByTagName('input');
         const select = document.getElementById('tr_' + index).getElementsByTagName('select');
+
         return {
-            x: +input[0].value,
-            y: +input[1].value,
-            font: +input[2].value,
+            x: Math.round(input[0].value / myApp.ratio),
+            y: Math.round(input[1].value / myApp.ratio),
+            font: Math.round(input[2].value / myApp.ratio),
             color: input[3].value,
             selected: input[4].checked,
             align: select[0].value,

@@ -64,6 +64,7 @@
         this.update = function () {
             dragEl.style.width = dragEl.children[0].style.width;
             dragEl.style.height = dragEl.children[0].style.height;
+            console.log(dragEl.children[0]);
         };
 
         targetEl.addEventListener('mousedown', startHandler);

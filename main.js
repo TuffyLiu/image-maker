@@ -32,7 +32,7 @@ function createWindow() {
     mainWindow.loadFile('index.html');
 
     // Open the DevTools.
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
 }
 
 // This method will be called when Electron has finished
@@ -173,9 +173,11 @@ const getWordSvg = (textToSVG, word, size = 100, color = '#fff') => {
     };
     const svg = textToSVG.getSVG(word, svgOptions);
     const width = Number(svg.match(/width="(.*?)"/)[1]);
+    const height = Number(svg.match(/height="(.*?)"/)[1]);
     const svgPath = Buffer.from(svg);
     return {
         width: width,
+        height: height,
         svgPath: svgPath
     };
 };
@@ -219,7 +221,7 @@ ipcMain.on('create-img', (event, params) => {
                     return {
                         input: buff,
                         blend: 'over',
-                        top: st.y,
+                        top:  Math.round(st.y - st.font / 2),
                         left: Math.max(0, st.align === 'center' ? Math.round(st.x - st.font / 2) : st.align === 'right' ? Math.round(st.x - st.font) : st.x)
                     };
                 } else {
@@ -229,7 +231,7 @@ ipcMain.on('create-img', (event, params) => {
                         return {
                             input: options.svgPath,
                             blend: 'over',
-                            top: st.y,
+                            top: Math.round(st.y - options.height / 2),
                             left: Math.max(0, st.align === 'center' ? Math.round(st.x - options.width / 2) : st.align === 'right' ? Math.round(st.x - options.width) : st.x)
                         };
                     } else {

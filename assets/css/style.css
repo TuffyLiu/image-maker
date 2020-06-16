@@ -23,27 +23,37 @@ html {
     background-size: cover;
     position: absolute;
     left: 50%;
-    top: -30px;
-    transform: translateX(-50%);
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
     z-index: 100;
 }
 .right {
     min-width: 500px;
     max-width: 500px;
     width: 500px;
+    padding: 20px;
 }
 .temp-img {
     width: 100%;
     height: auto;
+    /* border: 1px solid rgba(99,99,99, 0.5); */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 .word-container {
     position: relative;
     user-select: none;
 }
-.word-container span {
+.word-container p {
     display: block;
     /* position: absolute; */
-    line-height: 1;
+    /* transform: translateX(-50%); */
+    /* left: 50%; */
+    width: max-content;
+    min-height: 30px;
+    margin: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
 }
 .drag {
     position: absolute;
