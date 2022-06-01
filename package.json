@@ -56,7 +56,7 @@
   "dependencies": {
     "download": "^8.0.0",
     "node-xlsx": "^0.15.0",
-    "sharp": "^0.25.2",
+    "sharp": "^0.30.5",
     "text-to-svg": "^3.1.5"
   }
 }
